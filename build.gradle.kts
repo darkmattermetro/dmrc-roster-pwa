@@ -9,8 +9,6 @@ kotlin {
     js(IR) {
         browser {
             commonWebpackConfig {
-                outputFileName = "dmrc-roster-pwa.js"
-                publicPath = "/dmrc-roster-pwa/"
                 cssSupport {
                     enabled.set(true)
                 }
@@ -24,6 +22,8 @@ kotlin {
             dependencies {
                 implementation("org.jetbrains.kotlin-wrappers:kotlin-react:18.2.0-pre.682")
                 implementation("org.jetbrains.kotlin-wrappers:kotlin-react-dom:18.2.0-pre.682")
+                implementation("org.jetbrains.kotlin-wrappers:kotlin-react-router-dom:6.11.0-pre.682")
+                implementation("org.jetbrains.kotlin-wrappers:kotlin-emotion:11.11.0-pre.682")
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")
                 implementation(npm("chart.js", "4.4.1"))
