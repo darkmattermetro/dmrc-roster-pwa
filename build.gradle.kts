@@ -9,6 +9,8 @@ kotlin {
     js(IR) {
         browser {
             commonWebpackConfig {
+                outputFileName = "dmrc-roster-pwa.js"
+                publicPath = "/dmrc-roster-pwa/"
                 cssSupport {
                     enabled.set(true)
                 }

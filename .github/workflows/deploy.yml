@@ -20,7 +20,7 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
       - name: Build Production Bundle
-        run: gradle jsBrowserProductionWebpack --no-daemon
+        run: gradle browserProductionWebpack -Dorg.gradle.jvmargs="-Xmx2g" --no-daemon
       - name: Setup Pages
         uses: actions/configure-pages@v4
       - name: Upload artifact
