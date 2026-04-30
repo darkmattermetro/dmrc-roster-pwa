@@ -19,10 +19,8 @@ jobs:
           cache: 'gradle'
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
-      - name: List Tasks
-        run: gradle tasks
       - name: Build Production Bundle
-        run: gradle jsBrowserDistribution -Dorg.gradle.jvmargs="-Xmx4g" --no-daemon
+        run: gradle jsBrowserProductionWebpack --stacktrace --info -Dorg.gradle.jvmargs="-Xmx4g" --no-daemon
       - name: Setup Pages
         uses: actions/configure-pages@v4
       - name: Upload artifact
