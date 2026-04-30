@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#1a1a2e">
+    <meta name="description" content="DMRC Line 7 Roster Master - Duty finder for KKDA & PBGW Crew Control">
+    <base href="/dmrc-roster-pwa/">
+    <link rel="manifest" href="/dmrc-roster-pwa/manifest.json">
+    <link rel="icon" type="image/png" href="/dmrc-roster-pwa/icon-192.png">
+    <title>DMRC Line 7 Roster Master</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/dmrc-roster-pwa/styles.css">
+</head>
+<body>
+    <div id="root"></div>
+    <script src="/dmrc-roster-pwa/dmrc-roster-pwa.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/dmrc-roster-pwa/sw.js')
+                    .then(reg => console.log('SW registered'))
+                    .catch(err => console.log('SW failed', err));
+            });
+        }
+    </script>
+</body>
+</html>
