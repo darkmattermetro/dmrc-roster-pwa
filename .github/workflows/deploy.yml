@@ -20,9 +20,7 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
       - name: Build Production Bundle
-        run: gradle jsBrowserDistribution
-      - name: Debug Build Output
-        run: ls -R build/dist/js/productionExecutable || echo "Build directory not found"
+        run: gradle jsBrowserProductionWebpack --no-daemon
       - name: Setup Pages
         uses: actions/configure-pages@v4
       - name: Upload artifact
