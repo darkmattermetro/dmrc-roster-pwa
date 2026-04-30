@@ -11,15 +11,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Set up JDK
+      - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
+          cache: 'gradle'
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
-      - name: Build
+      - name: Build Production Bundle
         run: gradle jsBrowserDistribution
+      - name: Debug Build Output
+        run: ls -R build/dist/js/productionExecutable || echo "Build directory not found"
       - name: Setup Pages
         uses: actions/configure-pages@v4
       - name: Upload artifact
