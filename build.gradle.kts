@@ -8,6 +8,10 @@ version = "1.0.0"
 kotlin {
     js(IR) {
         browser {
+            // Disable tests to avoid the 'destination' property crash on GitHub Actions
+            testTask {
+                enabled = false
+            }
             commonWebpackConfig {
                 cssSupport {
                     enabled.set(true)
