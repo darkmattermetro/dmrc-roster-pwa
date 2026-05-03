@@ -18,7 +18,7 @@ kotlin {
     }
 
     sourceSets {
-        val main by getting {
+        val jsMain by getting {
             dependencies {
                 implementation("org.jetbrains.kotlin-wrappers:kotlin-react:18.2.0-pre.682")
                 implementation("org.jetbrains.kotlin-wrappers:kotlin-react-dom:18.2.0-pre.682")
