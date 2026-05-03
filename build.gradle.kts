@@ -1,5 +1,5 @@
 plugins {
-    kotlin("js") version "1.9.24"
+    kotlin("js") version "1.9.20"
 }
 
 group = "com.dmrc.roster"
@@ -8,7 +8,7 @@ version = "1.0.0"
 kotlin {
     js(IR) {
         browser {
-            // Disable test tasks to avoid Gradle 9.x compatibility issues
+            // Disable tests to avoid Gradle 9.x destination property crash
             testTask {
                 enabled = false
             }
@@ -20,16 +20,12 @@ kotlin {
         }
         binaries.executable()
     }
+}
 
-    sourceSets {
-        val jsMain by getting {
-            dependencies {
-                implementation("org.jetbrains.kotlin-wrappers:kotlin-react:18.2.0-pre.682")
-                implementation("org.jetbrains.kotlin-wrappers:kotlin-react-dom:18.2.0-pre.682")
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
-                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")
-                implementation(npm("chart.js", "4.4.1"))
-            }
-        }
-    }
+dependencies {
+    "jsMainImplementation"("org.jetbrains.kotlin-wrappers:kotlin-react:18.2.0-pre.682")
+    "jsMainImplementation"("org.jetbrains.kotlin-wrappers:kotlin-react-dom:18.2.0-pre.682")
+    "jsMainImplementation"("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
+    "jsMainImplementation"("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")
+    "jsMainImplementation"(npm("chart.js", "4.4.1"))
 }
