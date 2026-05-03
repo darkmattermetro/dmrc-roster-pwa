@@ -44,43 +44,42 @@ val HomeScreen = FC<HomeScreenProps> { props ->
         }
     }
 
-    val handleSearch = {
-        if (dutyInput.isBlank()) return@let
+    fun handleSearch() {
+        if (dutyInput.isBlank()) return
         props.onSearchDuty(selectedDay, dutyInput.trim())
     }
 
     div {
-        className = "home-container"
+        attrs["className"] = "home-container"
 
-        message?.let { msg ->
-            if (msg.userMessage.isNotEmpty()) {
-                div {
-                    className = "user-msg-banner"
-                    span { +"📢" }
-                    span { +msg.userMessage }
-                }
+        val msg = message
+        if (msg != null && msg.userMessage.isNotEmpty()) {
+            div {
+                attrs["className"] = "user-msg-banner"
+                span { +"📢" }
+                span { +msg.userMessage }
             }
         }
 
         div {
-            className = "glass-card"
+            attrs["className"] = "glass-card"
             h2 {
-                className = "card-title"
+                attrs["className"] = "card-title"
                 span {
-                    className = "highlight"
+                    attrs["className"] = "highlight"
                     +"Duty"
                 }
                 +" Finder"
             }
 
             div {
-                className = "input-group"
+                attrs["className"] = "input-group"
                 label {
-                    className = "input-label"
+                    attrs["className"] = "input-label"
                     +"SELECT DAY TYPE"
                 }
                 select {
-                    className = "jarvis-select"
+                    attrs["className"] = "jarvis-select"
                     value = selectedDay
                     onChange = { e -> setSelectedDay(e.target.value) }
                     for (day in listOf("Weekday", "Saturday", "Sunday", "Special")) {
@@ -93,13 +92,13 @@ val HomeScreen = FC<HomeScreenProps> { props ->
             }
 
             div {
-                className = "input-group"
+                attrs["className"] = "input-group"
                 label {
-                    className = "input-label"
+                    attrs["className"] = "input-label"
                     +"ENTER DUTY NUMBER"
                 }
                 input {
-                    className = "jarvis-input"
+                    attrs["className"] = "jarvis-input"
                     type = InputType.number
                     placeholder = "E.g. 101, 205, 308..."
                     value = dutyInput
@@ -108,14 +107,14 @@ val HomeScreen = FC<HomeScreenProps> { props ->
             }
 
             button {
-                className = "jarvis-btn btn-primary"
+                attrs["className"] = "jarvis-btn btn-primary"
                 onClick = { handleSearch() }
                 +"🔍 ACCESS DUTY DATA"
             }
         }
 
         div {
-            className = "status-bar"
+            attrs["className"] = "status-bar"
             +"⚡ SYSTEM ONLINE • SAFETY FIRST • SERVICE ALWAYS • KKDA CREW CONTROL ⚡"
         }
     }

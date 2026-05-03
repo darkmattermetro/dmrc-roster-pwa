@@ -5,6 +5,11 @@ import models.Message
 import kotlinx.browser.window
 import kotlinx.coroutines.await
 
+external interface MessageJson {
+    val user_message: String?
+    val popup_message: String?
+}
+
 class MessageService {
     private val baseUrl = SupabaseConfig.SUPABASE_URL
     
@@ -13,13 +18,13 @@ class MessageService {
             val response = window.fetch(
                 "$baseUrl/rest/v1/messages?id=eq.1&select=*",
                 org.w3c.fetch.RequestInit(
-                    headers = org.w3c.fetch.Headers(SupabaseConfig.selectHeaders().toPlainObject())
+                    headers = org.w3c.fetch.Headers(SupabaseConfig.selectHeaders().toJsObject())
                 )
             ).await()
             
-            val data = (response as dynamic).json().await()
-            if (data.length > 0) Message.fromJson(data[0]) else Message.empty()
-        } catch (e: dynamic) {
+            val data = response.json().await().unsafeCast<Array<MessageJson>>()
+            if (data.isNotEmpty()) Message.fromJson(data[0]) else Message.empty()
+        } catch (e: Throwable) {
             Message.empty()
         }
     }
@@ -33,12 +38,12 @@ class MessageService {
                 "$baseUrl/rest/v1/messages?id=eq.1",
                 org.w3c.fetch.RequestInit(
                     method = "PATCH",
-                    headers = org.w3c.fetch.Headers(SupabaseConfig.headers().toPlainObject()),
+                    headers = org.w3c.fetch.Headers(SupabaseConfig.headers().toJsObject()),
                     body = body
                 )
             ).await()
             true
-        } catch (e: dynamic) {
+        } catch (e: Throwable) {
             false
         }
     }
@@ -52,12 +57,12 @@ class MessageService {
                 "$baseUrl/rest/v1/messages?id=eq.1",
                 org.w3c.fetch.RequestInit(
                     method = "PATCH",
-                    headers = org.w3c.fetch.Headers(SupabaseConfig.headers().toPlainObject()),
+                    headers = org.w3c.fetch.Headers(SupabaseConfig.headers().toJsObject()),
                     body = body
                 )
             ).await()
             true
-        } catch (e: dynamic) {
+        } catch (e: Throwable) {
             false
         }
     }

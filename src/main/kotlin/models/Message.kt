@@ -1,5 +1,13 @@
 package models
 
+external interface MessageData {
+    val id: Int?
+    val user_message: String?
+    val popup_message: String?
+    val updated_at: String?
+    val updated_by: String?
+}
+
 data class Message(
     val id: Int = 0,
     val userMessage: String = "",
@@ -12,12 +20,12 @@ data class Message(
     
     companion object {
         fun empty() = Message()
-        fun fromJson(json: dynamic) = Message(
-            id = json.id?.unsafeCast<Int?>() ?: 0,
-            userMessage = json.user_message?.toString() ?: "",
-            popupMessage = json.popup_message?.toString() ?: "",
-            updatedAt = json.updated_at?.toString() ?: "",
-            updatedBy = json.updated_by?.toString() ?: ""
+        fun fromJson(json: MessageData) = Message(
+            id = json.id ?: 0,
+            userMessage = json.user_message ?: "",
+            popupMessage = json.popup_message ?: "",
+            updatedAt = json.updated_at ?: "",
+            updatedBy = json.updated_by ?: ""
         )
     }
 }

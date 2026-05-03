@@ -2,6 +2,7 @@ package utils
 
 import models.Duty
 import models.RakeGap
+import kotlin.math.abs
 
 object RakeAnalyzer {
     fun analyzeRakeGaps(duties: List<Duty>): List<RakeGap> {
@@ -35,20 +36,20 @@ object RakeAnalyzer {
                 val mkprException = trips[i].arrLoc.uppercase() == "MKPR" &&
                         trips[i + 1].depLoc.uppercase() == "MKPR" && sameDuty
                 
-                if (Math.abs(currentEnd - nextStart) > 1 && !mkprException) {
+                if (abs(currentEnd - nextStart) > 1 && !mkprException) {
                     gaps += RakeGap(
                         rakeId = rakeId,
                         time = trips[i].arrTime,
                         location = trips[i].arrLoc,
                         action = "RELIEVER REQUIRED",
-                        gapMinutes = Math.abs(currentEnd - nextStart)
+                        gapMinutes = abs(currentEnd - nextStart)
                     )
                     gaps += RakeGap(
                         rakeId = rakeId,
                         time = trips[i + 1].depTime,
                         location = trips[i + 1].depLoc,
                         action = "BOARDING",
-                        gapMinutes = Math.abs(currentEnd - nextStart)
+                        gapMinutes = abs(currentEnd - nextStart)
                     )
                 }
             }
@@ -96,20 +97,20 @@ object RakeAnalyzer {
                 val currentEnd = KmCalculator.timeToMinutes(trips[i].arrTime)
                 val nextStart = KmCalculator.timeToMinutes(trips[i + 1].depTime)
                 
-                if (Math.abs(currentEnd - nextStart) > 5) {
+                if (abs(currentEnd - nextStart) > 5) {
                     result += RakeGap(
                         rakeId = rakeId,
                         time = trips[i].arrTime,
                         location = trips[i].arrLoc,
                         action = "ALIGHT",
-                        gapMinutes = Math.abs(currentEnd - nextStart)
+                        gapMinutes = abs(currentEnd - nextStart)
                     )
                     result += RakeGap(
                         rakeId = rakeId,
                         time = trips[i + 1].depTime,
                         location = trips[i + 1].depLoc,
                         action = "BOARD",
-                        gapMinutes = Math.abs(currentEnd - nextStart)
+                        gapMinutes = abs(currentEnd - nextStart)
                     )
                 }
             }

@@ -1,5 +1,24 @@
 package models
 
+external interface DutyData {
+    val id: Int?
+    val duty_no: String?
+    val sign_on_time: String?
+    val sign_on_loc: String?
+    val sign_off_time: String?
+    val sign_off_loc: String?
+    val running_time: String?
+    val trip_no: String?
+    val station: String?
+    val rake: String?
+    val dep_loc: String?
+    val dep_time: String?
+    val arr_loc: String?
+    val arr_time: String?
+    val wef_date: String?
+    val remarks: String?
+}
+
 data class Duty(
     val id: Int = 0,
     val dutyNo: String = "",
@@ -21,24 +40,24 @@ data class Duty(
     val rake: String get() = rakeNum
     
     companion object {
-        fun fromJson(json: dynamic): Duty {
+        fun fromJson(json: DutyData): Duty {
             return Duty(
-                id = json.id?.unsafeCast<Int?>() ?: 0,
-                dutyNo = json.duty_no?.toString() ?: "",
-                signOnTime = json.sign_on_time?.toString() ?: "",
-                signOnLoc = json.sign_on_loc?.toString() ?: "",
-                signOffTime = json.sign_off_time?.toString() ?: "",
-                signOffLoc = json.sign_off_loc?.toString() ?: "",
-                runningTime = json.running_time?.toString() ?: "",
-                tripNo = json.trip_no?.toString() ?: "",
-                station = json.station?.toString() ?: "",
-                rakeNum = json.rake?.toString() ?: "",
-                depLoc = json.dep_loc?.toString() ?: "",
-                depTime = json.dep_time?.toString() ?: "",
-                arrLoc = json.arr_loc?.toString() ?: "",
-                arrTime = json.arr_time?.toString() ?: "",
-                wefDate = json.wef_date?.toString() ?: "",
-                remarks = json.remarks?.toString() ?: ""
+                id = json.id ?: 0,
+                dutyNo = json.duty_no ?: "",
+                signOnTime = json.sign_on_time ?: "",
+                signOnLoc = json.sign_on_loc ?: "",
+                signOffTime = json.sign_off_time ?: "",
+                signOffLoc = json.sign_off_loc ?: "",
+                runningTime = json.running_time ?: "",
+                tripNo = json.trip_no ?: "",
+                station = json.station ?: "",
+                rakeNum = json.rake ?: "",
+                depLoc = json.dep_loc ?: "",
+                depTime = json.dep_time ?: "",
+                arrLoc = json.arr_loc ?: "",
+                arrTime = json.arr_time ?: "",
+                wefDate = json.wef_date ?: "",
+                remarks = json.remarks ?: ""
             )
         }
     }

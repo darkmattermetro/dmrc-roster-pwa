@@ -34,10 +34,10 @@ val LoginScreen = FC<LoginScreenProps> { props ->
     val authService = AuthService()
     val scope = MainScope()
 
-    val handleLogin = {
+    fun handleLogin() {
         if (empId.isBlank() || password.isBlank()) {
             setError("Please fill all fields")
-            return@let
+            return
         }
         setIsLoading(true)
         setError(null)
@@ -53,10 +53,10 @@ val LoginScreen = FC<LoginScreenProps> { props ->
         }
     }
 
-    val handleRegister = {
+    fun handleRegister() {
         if (empId.isBlank() || password.isBlank() || name.isBlank() || accessCode.isBlank()) {
             setError("Please fill all fields")
-            return@let
+            return
         }
         setIsLoading(true)
         setError(null)
@@ -76,31 +76,32 @@ val LoginScreen = FC<LoginScreenProps> { props ->
     }
 
     div {
-        className = "login-container"
+        attrs["className"] = "login-container"
         div {
-            className = "glass-card login-card"
+            attrs["className"] = "glass-card login-card"
             div {
-                className = "logo-area centered"
+                attrs["className"] = "logo-area centered"
                 span { +"🚇" }
             }
             h2 {
-                className = "card-title"
+                attrs["className"] = "card-title"
                 +"DMRC LINE 7"
             }
             p {
-                className = "subtitle"
+                attrs["className"] = "subtitle"
                 +(if (isLogin) "Sign In to Continue" else "Create Your Account")
             }
 
-            error?.let { err ->
+            val err = error
+            if (err != null) {
                 div {
-                    className = "error-box"
+                    attrs["className"] = "error-box"
                     +err
                 }
             }
 
             div {
-                className = "input-group"
+                attrs["className"] = "input-group"
                 input {
                     type = InputType.text
                     placeholder = "Employee ID"
@@ -111,7 +112,7 @@ val LoginScreen = FC<LoginScreenProps> { props ->
 
             if (!isLogin) {
                 div {
-                    className = "input-group"
+                    attrs["className"] = "input-group"
                     input {
                         type = InputType.text
                         placeholder = "Full Name"
@@ -122,7 +123,7 @@ val LoginScreen = FC<LoginScreenProps> { props ->
             }
 
             div {
-                className = "input-group"
+                attrs["className"] = "input-group"
                 input {
                     type = InputType.password
                     placeholder = "Password"
@@ -133,9 +134,9 @@ val LoginScreen = FC<LoginScreenProps> { props ->
 
             if (!isLogin) {
                 div {
-                    className = "input-group"
+                    attrs["className"] = "input-group"
                     select {
-                        className = "jarvis-select"
+                        attrs["className"] = "jarvis-select"
                         value = accessLevel
                         onChange = { e -> setAccessLevel(e.target.value) }
                         option {
@@ -149,7 +150,7 @@ val LoginScreen = FC<LoginScreenProps> { props ->
                     }
                 }
                 div {
-                    className = "input-group"
+                    attrs["className"] = "input-group"
                     input {
                         type = InputType.password
                         placeholder = "Access Code"
@@ -160,14 +161,14 @@ val LoginScreen = FC<LoginScreenProps> { props ->
             }
 
             button {
-                className = "jarvis-btn btn-primary"
+                attrs["className"] = "jarvis-btn btn-primary"
                 disabled = isLoading
                 onClick = { if (isLogin) handleLogin() else handleRegister() }
                 +(if (isLoading) "Loading..." else if (isLogin) "LOGIN" else "REGISTER")
             }
 
             div {
-                className = "toggle-link"
+                attrs["className"] = "toggle-link"
                 onClick = { setIsLogin(!isLogin); setError(null) }
                 +(if (isLogin) "New staff? Register here" else "Already registered? Login")
             }

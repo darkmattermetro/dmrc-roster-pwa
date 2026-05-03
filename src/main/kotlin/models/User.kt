@@ -1,5 +1,14 @@
 package models
 
+external interface ProfileData {
+    val id: String?
+    val emp_id: String?
+    val name: String?
+    val access_level: String?
+    val created_at: String?
+    val last_login: String?
+}
+
 data class User(
     val id: String = "",
     val empId: String = "",
@@ -12,14 +21,14 @@ data class User(
     val isCrewController: Boolean get() = accessLevel == "crewcontroller"
     
     companion object {
-        fun fromJson(json: dynamic): User {
+        fun fromJson(json: ProfileData): User {
             return User(
-                id = json.id?.toString() ?: "",
-                empId = json.emp_id?.toString() ?: "",
-                name = json.name?.toString() ?: "",
-                accessLevel = json.access_level?.toString() ?: "crewcontroller",
-                createdAt = json.created_at?.toString() ?: "",
-                lastLogin = json.last_login?.toString() ?: ""
+                id = json.id ?: "",
+                empId = json.emp_id ?: "",
+                name = json.name ?: "",
+                accessLevel = json.access_level ?: "crewcontroller",
+                createdAt = json.created_at ?: "",
+                lastLogin = json.last_login ?: ""
             )
         }
     }

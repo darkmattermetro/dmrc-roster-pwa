@@ -11,6 +11,7 @@ import react.useState
 import react.useEffect
 import services.AuthService
 import react.dom.html.ReactHTML.div
+import react.ClassName
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 
@@ -30,18 +31,18 @@ val App = FC<react.Props> {
         }
     }
 
-    val handleLogin = { user: User ->
+    val handleLogin: (User) -> Unit = { user ->
         setCurrentUser(user)
         setCurrentPage("home")
     }
 
-    val handleLogout = {
+    val handleLogout: () -> Unit = {
         authService.clearCurrentUser()
         setCurrentUser(null)
         setCurrentPage("login")
     }
 
-    val handleSearchDuty = { dayType: String, dutyNo: String ->
+    val handleSearchDuty: (String, String) -> Unit = { dayType, dutyNo ->
         setSearchDayType(dayType)
         setSearchDutyNo(dutyNo)
         setCurrentPage("searching")
@@ -62,10 +63,10 @@ val App = FC<react.Props> {
             onSearchDuty = handleSearchDuty
         }
         "searching" -> div {
-            className = "loading-screen"
-            div { className = "spinner" }
+            attrs["className"] = "loading-screen"
+            div { attrs["className"] = "spinner" }
             div {
-                className = "loading-text"
+                attrs["className"] = "loading-text"
                 +"Searching duty data..."
             }
         }

@@ -9,6 +9,29 @@ import utils.RakeAnalyzer
 import kotlinx.browser.window
 import kotlinx.coroutines.await
 
+external interface DutyJson {
+    val duty_no: String?
+    val sign_on_time: String?
+    val sign_on_loc: String?
+    val sign_off_time: String?
+    val sign_off_loc: String?
+    val running_time: String?
+    val trip_no: String?
+    val station: String?
+    val rake: String?
+    val dep_loc: String?
+    val dep_time: String?
+    val arr_loc: String?
+    val arr_time: String?
+    val wef_date: String?
+    val remarks: String?
+}
+
+external interface ConfigJson {
+    val value: String?
+    val value2: String?
+}
+
 class DutyService {
     private val baseUrl = SupabaseConfig.SUPABASE_URL
     
@@ -29,33 +52,30 @@ class DutyService {
             val response = window.fetch(
                 "$baseUrl/rest/v1/$table?duty_no=ilike.%25$searchDuty%25&order=id",
                 org.w3c.fetch.RequestInit(
-                    headers = org.w3c.fetch.Headers(SupabaseConfig.selectHeaders().toPlainObject())
+                    headers = org.w3c.fetch.Headers(SupabaseConfig.selectHeaders().toJsObject())
                 )
             ).await()
             
-            val data = (response as dynamic).json().await()
+            val data = response.json().await().unsafeCast<Array<DutyJson>>()
             
-            if (data.length == 0) {
+            if (data.isEmpty()) {
                 return DutyResult.error("Duty '$dutyNo' not found in $dayType roster.")
             }
             
-            val duties = mutableListOf<Duty>()
-            for (i in 0 until data.length) {
-                duties += Duty.fromJson(data[i])
-            }
+            val duties = data.map { Duty.fromJson(it) }.toMutableList()
             
             var wefDate = ""
             var remarks = ""
             val configResp = window.fetch(
                 "$baseUrl/rest/v1/config?key=eq.$dayType&select=*",
                 org.w3c.fetch.RequestInit(
-                    headers = org.w3c.fetch.Headers(SupabaseConfig.selectHeaders().toPlainObject())
+                    headers = org.w3c.fetch.Headers(SupabaseConfig.selectHeaders().toJsObject())
                 )
             ).await()
-            val configData = (configResp as dynamic).json().await()
-            if (configData.length > 0) {
-                wefDate = configData[0].value?.toString() ?: ""
-                remarks = configData[0].value2?.toString() ?: ""
+            val configData = configResp.json().await().unsafeCast<Array<ConfigJson>>()
+            if (configData.isNotEmpty()) {
+                wefDate = configData[0].value ?: ""
+                remarks = configData[0].value2 ?: ""
             }
             
             var totalKm = 0.0
@@ -68,36 +88,36 @@ class DutyService {
             val rakeGaps = RakeAnalyzer.analyzeRakeGaps(duties)
             
             DutyResult.success(duties, totalKm, wefDate, remarks, rakeGaps)
-        } catch (e: dynamic) {
-            DutyResult.error("Error fetching duty: ${e.toString()}")
+        } catch (e: Throwable) {
+            DutyResult.error("Error fetching duty: ${e.message}")
         }
     }
     
-    suspend fun getStats(): Map<String, dynamic> {
+    suspend fun getStats(): String {
         return try {
-            val result = mutableMapOf<String, dynamic>()
+            val result = mutableMapOf<String, String>()
             
             for (dayType in listOf("weekday", "saturday", "sunday", "special")) {
                 val table = "duties_$dayType"
                 val response = window.fetch(
                     "$baseUrl/rest/v1/$table?select=id,duty_no",
                     org.w3c.fetch.RequestInit(
-                        headers = org.w3c.fetch.Headers(SupabaseConfig.selectHeaders().toPlainObject())
+                        headers = org.w3c.fetch.Headers(SupabaseConfig.selectHeaders().toJsObject())
                     )
                 ).await()
                 
-                val data = (response as dynamic).json().await()
+                val data = response.json().await().unsafeCast<Array<DutyJson>>()
                 val duties = mutableSetOf<String>()
-                for (i in 0 until data.length) {
-                    duties += data[i].duty_no?.toString() ?: ""
+                for (d in data) {
+                    d.duty_no?.let { duties += it }
                 }
                 
-                result[dayType] = js("""{"rows": ${data.length}, "duties": ${duties.size}}""")
+                result[dayType] = "${data.size} rows, ${duties.size} duties"
             }
             
-            result
-        } catch (e: dynamic) {
-            emptyMap()
+            result.entries.joinToString(", ") { "${it.key}: ${it.value}" }
+        } catch (e: Throwable) {
+            "Error loading stats: ${e.message}"
         }
     }
     
@@ -108,11 +128,11 @@ class DutyService {
                 "$baseUrl/rest/v1/$table",
                 org.w3c.fetch.RequestInit(
                     method = "DELETE",
-                    headers = org.w3c.fetch.Headers(SupabaseConfig.headers().toPlainObject())
+                    headers = org.w3c.fetch.Headers(SupabaseConfig.headers().toJsObject())
                 )
             ).await()
             true
-        } catch (e: dynamic) {
+        } catch (e: Throwable) {
             false
         }
     }
@@ -130,12 +150,12 @@ class DutyService {
                 "$baseUrl/rest/v1/$table",
                 org.w3c.fetch.RequestInit(
                     method = "POST",
-                    headers = org.w3c.fetch.Headers(SupabaseConfig.headers().toPlainObject()),
+                    headers = org.w3c.fetch.Headers(SupabaseConfig.headers().toJsObject()),
                     body = "[$jsonArray]"
                 )
             ).await()
             true
-        } catch (e: dynamic) {
+        } catch (e: Throwable) {
             false
         }
     }

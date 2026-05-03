@@ -4,6 +4,7 @@ import models.DutyResult
 import models.RakeGap
 import models.Duty
 import utils.KmCalculator
+import utils.formatDouble
 import react.FC
 import react.Props
 import react.useState
@@ -17,6 +18,7 @@ import react.dom.html.ReactHTML.tr
 import react.dom.html.ReactHTML.th
 import react.dom.html.ReactHTML.td
 import react.dom.html.ReactHTML.button
+import react.dom.html.ReactHTML.h4
 
 external interface DutyResultScreenProps : Props {
     var result: DutyResult
@@ -32,19 +34,19 @@ val DutyResultScreen = FC<DutyResultScreenProps> { props ->
     val totalTrips = result.duties.count { it.rakeNum.isNotBlank() }
 
     div {
-        className = "result-container"
+        attrs["className"] = "result-container"
 
         div {
-            className = "quick-search"
+            attrs["className"] = "quick-search"
             div {
-                className = "result-header"
+                attrs["className"] = "result-header"
                 h3 {
-                    className = "card-title"
+                    attrs["className"] = "card-title"
                     +"DUTY ${props.dutyNo} • ${props.dayType}"
                 }
                 if (result.wefDate.isNotEmpty()) {
                     p {
-                        className = "wef-info"
+                        attrs["className"] = "wef-info"
                         +"WEF: ${result.wefDate}"
                         if (result.remarks.isNotEmpty()) +" | ${result.remarks}"
                     }
@@ -53,55 +55,55 @@ val DutyResultScreen = FC<DutyResultScreenProps> { props ->
         }
 
         div {
-            className = "summary-grid"
+            attrs["className"] = "summary-grid"
             div {
-                className = "summary-box"
-                div { className = "label"; +"TOTAL KM" }
-                div { className = "value cyan"; +"${"%.2f".format(result.totalKm)}" }
+                attrs["className"] = "summary-box"
+                div { attrs["className"] = "label"; +"TOTAL KM" }
+                div { attrs["className"] = "value cyan"; +formatDouble(result.totalKm) }
             }
             div {
-                className = "summary-box"
-                div { className = "label"; +"TRIPS" }
-                div { className = "value orange"; +"$totalTrips" }
+                attrs["className"] = "summary-box"
+                div { attrs["className"] = "label"; +"TRIPS" }
+                div { attrs["className"] = "value orange"; +"$totalTrips" }
             }
             div {
-                className = "summary-box"
-                div { className = "label"; +"X POINTS" }
-                div { className = "value green"; +"${result.rakeGaps.size}" }
+                attrs["className"] = "summary-box"
+                div { attrs["className"] = "label"; +"X POINTS" }
+                div { attrs["className"] = "value green"; +"${result.rakeGaps.size}" }
             }
         }
 
         if (showRake && result.rakeGaps.isNotEmpty()) {
             div {
-                className = "glass-card"
+                attrs["className"] = "glass-card"
                 div {
-                    className = "section-header"
-                    div { className = "section-icon"; +"⚠️" }
-                    div { className = "section-title"; +"Reliever Points (X)" }
+                    attrs["className"] = "section-header"
+                    div { attrs["className"] = "section-icon"; +"⚠️" }
+                    div { attrs["className"] = "section-title"; +"Reliever Points (X)" }
                 }
                 div {
-                    className = "rake-gaps-list"
+                    attrs["className"] = "rake-gaps-list"
                     result.rakeGaps.forEach { gap ->
                         div {
-                            className = "rake-gap-item ${if (gap.action == "RELIEVER REQUIRED") "gap-warning" else ""}"
+                            attrs["className"] = "rake-gap-item ${if (gap.action == "RELIEVER REQUIRED") "gap-warning" else ""}"
                             div {
-                                className = "gap-badge"
+                                attrs["className"] = "gap-badge"
                                 +gap.action.substring(0, 1)
                             }
                             div {
-                                className = "gap-details"
+                                attrs["className"] = "gap-details"
                                 div {
-                                    className = "gap-rake"
+                                    attrs["className"] = "gap-rake"
                                     +"${gap.rakeId} @ ${gap.location}"
                                 }
                                 div {
-                                    className = "gap-action"
+                                    attrs["className"] = "gap-action"
                                     +"${gap.action} • ${gap.time}"
                                 }
                             }
                             if (gap.gapMinutes > 0) {
                                 div {
-                                    className = "gap-minutes"
+                                    attrs["className"] = "gap-minutes"
                                     +"${gap.gapMinutes}m"
                                 }
                             }
@@ -112,16 +114,16 @@ val DutyResultScreen = FC<DutyResultScreenProps> { props ->
         }
 
         div {
-            className = "glass-card"
+            attrs["className"] = "glass-card"
             div {
-                className = "section-header"
-                div { className = "section-icon"; +"📋" }
-                div { className = "section-title"; +"Trip Details" }
+                attrs["className"] = "section-header"
+                div { attrs["className"] = "section-icon"; +"📋" }
+                div { attrs["className"] = "section-title"; +"Trip Details" }
             }
             div {
-                className = "table-wrap"
+                attrs["className"] = "table-wrap"
                 table {
-                    className = "data-table"
+                    attrs["className"] = "data-table"
                     thead {
                         tr {
                             listOf("#", "FROM", "TO", "DEP", "ARR", "RAKE", "KM").forEach { h ->
@@ -138,31 +140,31 @@ val DutyResultScreen = FC<DutyResultScreenProps> { props ->
                                 g.rakeId == duty.rakeNum && g.time == duty.arrTime
                             }
                             tr {
-                                className = if (hasGap) "row-gap" else ""
+                                attrs["className"] = if (hasGap) "row-gap" else ""
                                 td { +"${index + 1}" }
                                 td {
-                                    className = "station-cell"
+                                    attrs["className"] = "station-cell"
                                     +duty.depLoc
                                 }
                                 td {
-                                    className = "station-cell"
+                                    attrs["className"] = "station-cell"
                                     +duty.arrLoc
                                 }
                                 td {
-                                    className = "time-cell"
+                                    attrs["className"] = "time-cell"
                                     +duty.depTime
                                 }
                                 td {
-                                    className = "time-cell"
+                                    attrs["className"] = "time-cell"
                                     +duty.arrTime
                                 }
                                 td {
-                                    className = if (duty.rakeNum.isNotBlank()) "rake-cell" else ""
+                                    attrs["className"] = if (duty.rakeNum.isNotBlank()) "rake-cell" else ""
                                     +if (duty.rakeNum.isNotBlank()) duty.rakeNum else "-"
                                 }
                                 td {
-                                    className = "km-cell"
-                                    +if (km > 0) "%.1f".format(km) else "-"
+                                    attrs["className"] = "km-cell"
+                                    +if (km > 0) formatDouble(km, 1) else "-"
                                 }
                             }
                         }
@@ -172,9 +174,9 @@ val DutyResultScreen = FC<DutyResultScreenProps> { props ->
         }
 
         div {
-            className = "rake-breakdown"
+            attrs["className"] = "rake-breakdown"
             h4 {
-                className = "section-title"
+                attrs["className"] = "section-title"
                 +"RAKE BREAKDOWN"
             }
             val rakeGroups = result.duties.groupBy { it.rakeNum }.filter { it.key.isNotBlank() }
@@ -183,32 +185,32 @@ val DutyResultScreen = FC<DutyResultScreenProps> { props ->
                     KmCalculator.getKmReverse(it.depLoc, it.arrLoc)
                 }
                 div {
-                    className = "rake-item"
+                    attrs["className"] = "rake-item"
                     div {
-                        className = "rake-badge"
+                        attrs["className"] = "rake-badge"
                         +rakeId
                     }
                     div {
-                        className = "rake-info"
+                        attrs["className"] = "rake-info"
                         +"${rakeDuties.size} trips"
                     }
                     div {
-                        className = "rake-km"
-                        +"${"%.2f".format(rakeKm)} KM"
+                        attrs["className"] = "rake-km"
+                        +"${formatDouble(rakeKm)} KM"
                     }
                 }
             }
         }
 
         div {
-            className = "button-row"
+            attrs["className"] = "button-row"
             button {
-                className = "jarvis-btn btn-back"
+                attrs["className"] = "jarvis-btn btn-back"
                 onClick = { props.onBack() }
                 +"← HOME"
             }
             button {
-                className = "jarvis-btn btn-primary"
+                attrs["className"] = "jarvis-btn btn-primary"
                 onClick = { props.onNewSearch() }
                 +"🔍 NEW SEARCH"
             }

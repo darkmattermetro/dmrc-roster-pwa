@@ -8,6 +8,15 @@ import kotlinx.coroutines.await
 
 private const val ACCESS_CODE = "satvik"
 
+external interface ProfileJson {
+    val emp_id: String?
+    val name: String?
+    val password_hash: String?
+    val access_level: String?
+    val created_at: String?
+    val last_login: String?
+}
+
 class AuthService {
     private val baseUrl = SupabaseConfig.SUPABASE_URL
     
@@ -19,18 +28,18 @@ class AuthService {
             val response = window.fetch(
                 "$baseUrl/rest/v1/profiles?emp_id=eq.$normalizedId&select=*",
                 org.w3c.fetch.RequestInit(
-                    headers = org.w3c.fetch.Headers(SupabaseConfig.selectHeaders().toPlainObject())
+                    headers = org.w3c.fetch.Headers(SupabaseConfig.selectHeaders().toJsObject())
                 )
             ).await()
             
-            val data = (response as dynamic).json().await()
+            val data = response.json().await().unsafeCast<Array<ProfileJson>>()
             
-            if (data.length == 0) {
+            if (data.isEmpty()) {
                 return AuthResult.failure("Emp ID not found. Please register first.")
             }
             
             val profile = data[0]
-            val storedHash = profile.password_hash?.toString() ?: ""
+            val storedHash = profile.password_hash ?: ""
             
             if (storedHash != inputHash) {
                 return AuthResult.failure("Invalid Password!")
@@ -41,14 +50,14 @@ class AuthService {
                 "$baseUrl/rest/v1/profiles?emp_id=eq.$normalizedId",
                 org.w3c.fetch.RequestInit(
                     method = "PATCH",
-                    headers = org.w3c.fetch.Headers(SupabaseConfig.headers().toPlainObject()),
-                    body = JSON.stringify(js("{last_login: '$now'}"))
+                    headers = org.w3c.fetch.Headers(SupabaseConfig.headers().toJsObject()),
+                    body = JSON.stringify(js("({last_login: '$now'})"))
                 )
             ).await()
             
             AuthResult.success(User.fromJson(profile))
-        } catch (e: dynamic) {
-            AuthResult.failure("Login failed: ${e.toString()}")
+        } catch (e: Throwable) {
+            AuthResult.failure("Login failed: ${e.message}")
         }
     }
     
@@ -64,82 +73,78 @@ class AuthService {
             val allowedResp = window.fetch(
                 "$baseUrl/rest/v1/$allowedTable?emp_id=eq.$normalizedId&select=*",
                 org.w3c.fetch.RequestInit(
-                    headers = org.w3c.fetch.Headers(SupabaseConfig.selectHeaders().toPlainObject())
+                    headers = org.w3c.fetch.Headers(SupabaseConfig.selectHeaders().toJsObject())
                 )
             ).await()
             
-            val allowedData = (allowedResp as dynamic).json().await()
-            if (allowedData.length == 0) {
+            val allowedData = allowedResp.json().await().unsafeCast<Array<ProfileJson>>()
+            if (allowedData.isEmpty()) {
                 return AuthResult.failure("Emp ID not authorized for $accessLevel access!")
             }
             
             val existingResp = window.fetch(
                 "$baseUrl/rest/v1/profiles?emp_id=eq.$normalizedId&select=*",
                 org.w3c.fetch.RequestInit(
-                    headers = org.w3c.fetch.Headers(SupabaseConfig.selectHeaders().toPlainObject())
+                    headers = org.w3c.fetch.Headers(SupabaseConfig.selectHeaders().toJsObject())
                 )
             ).await()
             
-            val existingData = (existingResp as dynamic).json().await()
-            if (existingData.length > 0) {
+            val existingData = existingResp.json().await().unsafeCast<Array<ProfileJson>>()
+            if (existingData.isNotEmpty()) {
                 return AuthResult.failure("Emp ID already registered! Please login.")
             }
             
             val passwordHash = hashPassword(password)
             val now = js("new Date().toISOString()").toString()
             
-            val insertBody = JSON.stringify(js("""
-                {
-                    "emp_id": "$normalizedId",
-                    "name": "$name",
-                    "password_hash": "$passwordHash",
-                    "access_level": "$accessLevel",
-                    "created_at": "$now"
-                }
-            """.trimIndent()))
+            val insertBody = js("""({
+                emp_id: "$normalizedId",
+                name: "$name",
+                password_hash: "$passwordHash",
+                access_level: "$accessLevel",
+                created_at: "$now"
+            })""")
             
             window.fetch(
                 "$baseUrl/rest/v1/profiles",
                 org.w3c.fetch.RequestInit(
                     method = "POST",
-                    headers = org.w3c.fetch.Headers(SupabaseConfig.headers().toPlainObject()),
-                    body = insertBody
+                    headers = org.w3c.fetch.Headers(SupabaseConfig.headers().toJsObject()),
+                    body = JSON.stringify(insertBody)
                 )
             ).await()
             
             val newResp = window.fetch(
                 "$baseUrl/rest/v1/profiles?emp_id=eq.$normalizedId&select=*",
                 org.w3c.fetch.RequestInit(
-                    headers = org.w3c.fetch.Headers(SupabaseConfig.selectHeaders().toPlainObject())
+                    headers = org.w3c.fetch.Headers(SupabaseConfig.selectHeaders().toJsObject())
                 )
             ).await()
             
-            val newData = (newResp as dynamic).json().await()
-            if (newData.length > 0) {
+            val newData = newResp.json().await().unsafeCast<Array<ProfileJson>>()
+            if (newData.isNotEmpty()) {
                 AuthResult.success(User.fromJson(newData[0]))
             } else {
                 AuthResult.failure("Registration failed")
             }
-        } catch (e: dynamic) {
-            AuthResult.failure("Registration failed: ${e.toString()}")
+        } catch (e: Throwable) {
+            AuthResult.failure("Registration failed: ${e.message}")
         }
     }
     
     fun saveCurrentUser(user: User) {
-        val json = JSON.stringify(js("""
-            {"id":"${user.id}","empId":"${user.empId}","name":"${user.name}","accessLevel":"${user.accessLevel}"}
-        """.trimIndent()))
-        window.localStorage.setItem("dmrc_user", json)
+        val json = js("""({id:"${user.id}",empId:"${user.empId}",name:"${user.name}",accessLevel:"${user.accessLevel}"})""")
+        window.localStorage.setItem("dmrc_user", JSON.stringify(json))
     }
     
     fun getCurrentUser(): User? {
         val stored = window.localStorage.getItem("dmrc_user") ?: return null
-        val data = JSON.parse(stored)
+        val data = JSON.parse<ProfileJson>(stored)
         return User(
-            id = data.id?.toString() ?: "",
-            empId = data.empId?.toString() ?: "",
-            name = data.name?.toString() ?: "",
-            accessLevel = data.accessLevel?.toString() ?: "crewcontroller"
+            id = data.emp_id ?: "",
+            empId = data.emp_id ?: "",
+            name = data.name ?: "",
+            accessLevel = data.access_level ?: "crewcontroller"
         )
     }
     
@@ -158,7 +163,7 @@ class AuthService {
     }
 }
 
-fun Map<String, String>.toPlainObject(): dynamic {
+fun Map<String, String>.toJsObject(): dynamic {
     val obj = js("{}")
     for ((k, v) in this) {
         obj[k] = v

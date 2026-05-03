@@ -2,11 +2,14 @@ package screens
 
 import models.User
 import models.Message
+import models.RakeGap
+import models.Duty
+import utils.RakeAnalyzer
+import utils.formatDouble
 import react.FC
 import react.Props
 import react.useState
 import react.useEffect
-import react.createRef
 import kotlinx.coroutines.*
 import services.MessageService
 import services.DutyService
@@ -22,6 +25,7 @@ import react.dom.html.ReactHTML.select
 import react.dom.html.ReactHTML.option
 import react.dom.html.ReactHTML.p
 import web.html.InputType
+import kotlinx.browser.window
 
 external interface AdminScreenProps : Props {
     var user: User
@@ -40,26 +44,26 @@ val AdminScreen = FC<AdminScreenProps> { props ->
     )
 
     div {
-        className = "admin-container"
+        attrs["className"] = "admin-container"
         div {
-            className = "admin-header"
+            attrs["className"] = "admin-header"
             h2 { +"⚙️ Admin Console" }
             div {
-                className = "admin-user-info"
+                attrs["className"] = "admin-user-info"
                 +"${props.user.name} (${props.user.empId})"
                 span {
-                    className = "access-badge ${if (props.user.isAdmin) "admin" else "cc"}"
+                    attrs["className"] = "access-badge ${if (props.user.isAdmin) "admin" else "cc"}"
                     +props.user.accessLevel.uppercase()
                 }
             }
         }
 
         div {
-            className = "tab-nav"
+            attrs["className"] = "tab-nav"
             tabs.forEach { (key, label) ->
                 val isActive = activeTab == key
                 button {
-                    className = "tab-btn ${if (isActive) "active" else ""}"
+                    attrs["className"] = "tab-btn ${if (isActive) "active" else ""}"
                     onClick = { setActiveTab(key) }
                     +label
                 }
@@ -67,7 +71,7 @@ val AdminScreen = FC<AdminScreenProps> { props ->
         }
 
         div {
-            className = "tab-content"
+            attrs["className"] = "tab-content"
             when (activeTab) {
                 "messages" -> MessageTab { empId = props.user.empId }
                 "upload" -> UploadTab { empId = props.user.empId }
@@ -78,8 +82,8 @@ val AdminScreen = FC<AdminScreenProps> { props ->
         }
 
         button {
-            className = "jarvis-btn btn-back"
-            style = js("{marginTop: '20px'}")
+            attrs["className"] = "jarvis-btn btn-back"
+            attrs["style"] = js("{marginTop: '20px'}")
             onClick = { props.onBack() }
             +"← Back to Home"
         }
@@ -107,7 +111,7 @@ val MessageTab = FC<MessageTabProps> { props ->
         }
     }
 
-    val saveMessage = { msgType: String ->
+    fun saveMessage(msgType: String) {
         setIsSaving(true)
         scope.launch {
             if (msgType == "user") {
@@ -120,23 +124,23 @@ val MessageTab = FC<MessageTabProps> { props ->
     }
 
     if (isLoading) {
-        div { className = "loading"; +"Loading..." }
+        div { attrs["className"] = "loading"; +"Loading..." }
         return@FC
     }
 
     div {
-        className = "admin-section"
+        attrs["className"] = "admin-section"
         h3 { +"📢 User Message" }
         div {
-            className = "input-row"
+            attrs["className"] = "input-row"
             textarea {
-                className = "jarvis-input"
+                attrs["className"] = "jarvis-input"
                 value = userMsg
                 placeholder = "Type important message..."
                 onChange = { e -> setUserMsg(e.target.value) }
             }
             button {
-                className = "jarvis-btn btn-purple btn-sm"
+                attrs["className"] = "jarvis-btn btn-purple btn-sm"
                 disabled = isSaving
                 onClick = { saveMessage("user") }
                 +"💾 SAVE"
@@ -145,15 +149,15 @@ val MessageTab = FC<MessageTabProps> { props ->
 
         h3 { +"🔔 Popup Message" }
         div {
-            className = "input-row"
+            attrs["className"] = "input-row"
             textarea {
-                className = "jarvis-input"
+                attrs["className"] = "jarvis-input"
                 value = popupMsg
                 placeholder = "Type popup message..."
                 onChange = { e -> setPopupMsg(e.target.value) }
             }
             button {
-                className = "jarvis-btn btn-orange btn-sm"
+                attrs["className"] = "jarvis-btn btn-orange btn-sm"
                 disabled = isSaving
                 onClick = { saveMessage("popup") }
                 +"💾 SAVE"
@@ -176,22 +180,19 @@ val UploadTab = FC<UploadTabProps> { props ->
     val dutyService = DutyService()
     val scope = MainScope()
 
-    val handleFileChange = { event: dynamic ->
-        val file = event.target.files[0]
-        if (file != null) {
-            val reader = js("new FileReader()")
-            reader.onload = { e: dynamic ->
-                setCsvData(e.target.result.toString())
-                setMessage("File loaded: ${file.name}")
-            }
-            reader.readAsText(file)
+    fun handleFileUpload(file: dynamic) {
+        val reader = js("new FileReader()")
+        reader.onload = { e: dynamic ->
+            setCsvData(e.target.result.toString())
+            setMessage("File loaded")
         }
+        reader.readAsText(file)
     }
 
-    val handleUpload = {
+    fun handleUpload() {
         if (csvData.isBlank()) {
             setMessage("Please select a CSV file first")
-            return@let
+            return
         }
         setIsUploading(true)
         scope.launch {
@@ -238,22 +239,23 @@ val UploadTab = FC<UploadTabProps> { props ->
                 } else {
                     setMessage("Upload failed")
                 }
-            } catch (e: dynamic) {
-                setMessage("Error: ${e.toString()}")
+            } catch (e: Throwable) {
+                setMessage("Error: ${e.message}")
             }
             setIsUploading(false)
         }
     }
 
     div {
-        className = "admin-section"
+        attrs["className"] = "admin-section"
         h3 { +"📤 Upload Duty Data" }
 
         div {
-            className = "input-group"
-            label { className = "input-label"; +"Day Type" }
+            attrs["className"] = "input-group"
+            attrs["className"] = "jarvis-select"
+            label { attrs["className"] = "input-label"; +"Day Type" }
             select {
-                className = "jarvis-select"
+                attrs["className"] = "jarvis-select"
                 value = dayType
                 onChange = { e -> setDayType(e.target.value) }
                 listOf("Weekday", "Saturday", "Sunday", "Special").forEach { day ->
@@ -263,44 +265,45 @@ val UploadTab = FC<UploadTabProps> { props ->
         }
 
         div {
-            className = "input-group"
-            label { className = "input-label"; +"WEF Date" }
+            attrs["className"] = "input-group"
+            label { attrs["className"] = "input-label"; +"WEF Date" }
             input {
-                className = "jarvis-input"
+                attrs["className"] = "jarvis-input"
                 value = wef
                 onChange = { e -> setWef(e.target.value) }
             }
         }
 
         div {
-            className = "input-group"
-            label { className = "input-label"; +"Remarks" }
+            attrs["className"] = "input-group"
+            label { attrs["className"] = "input-label"; +"Remarks" }
             input {
-                className = "jarvis-input"
+                attrs["className"] = "jarvis-input"
                 value = remarks
                 onChange = { e -> setRemarks(e.target.value) }
             }
         }
 
         div {
-            className = "input-group"
-            label { className = "input-label"; +"CSV File" }
+            attrs["className"] = "input-group"
+            label { attrs["className"] = "input-label"; +"CSV File" }
             input {
                 type = InputType.file
                 accept = ".csv"
-                onChange = { e -> handleFileChange(e.target) }
+                onChange = { e -> handleFileUpload(e.target.files[0]) }
             }
         }
 
-        message?.let { msg ->
+        val msg = message
+        if (msg != null) {
             div {
-                className = if (msg.contains("Error") || msg.contains("failed")) "error-box" else "success-box"
+                attrs["className"] = if (msg.contains("Error") || msg.contains("failed")) "error-box" else "success-box"
                 +msg
             }
         }
 
         button {
-            className = "jarvis-btn btn-orange"
+            attrs["className"] = "jarvis-btn btn-orange"
             disabled = isUploading || csvData.isBlank()
             onClick = { handleUpload() }
             +(if (isUploading) "Uploading..." else "📤 UPLOAD TO $dayType")
@@ -309,74 +312,63 @@ val UploadTab = FC<UploadTabProps> { props ->
 }
 
 val StatsTab = FC<Props> {
-    val (stats, setStats) = useState<Map<String, dynamic>?>(null)
     val (isLoading, setIsLoading) = useState(true)
+    val (statsText, setStatsText) = useState("")
     val dutyService = DutyService()
     val scope = MainScope()
 
     useEffect(Unit) {
         scope.launch {
-            val s = dutyService.getStats()
-            setStats(s)
+            try {
+                val s = dutyService.getStats()
+                setStatsText(s.toString())
+            } catch (e: Throwable) {
+                setStatsText("Error loading stats")
+            }
             setIsLoading(false)
         }
     }
 
     if (isLoading) {
-        div { className = "loading"; +"Loading stats..." }
+        div { attrs["className"] = "loading"; +"Loading stats..." }
         return@FC
     }
 
     div {
-        className = "admin-section"
+        attrs["className"] = "admin-section"
         h3 { +"📊 Data Statistics" }
-        stats?.let { s ->
-            listOf("weekday", "saturday", "sunday", "special").forEach { day ->
-                val dayData = s[day]
-                if (dayData != null) {
-                    div {
-                        className = "stat-row"
-                        span {
-                            className = "stat-label"
-                            +day.uppercase()
-                        }
-                        span { +"${dayData.duties} duties" }
-                        span { +"${dayData.rows} rows" }
-                    }
-                }
-            }
-        }
+        p { +statsText }
     }
 }
 
 val TetraTab = FC<Props> {
     val (dayType, setDayType) = useState("Weekday")
     val (dutyNo, setDutyNo) = useState("")
-    val (gaps, setGaps) = useState<List<models.RakeGap>>(emptyList())
+    val (gaps, setGaps) = useState<List<RakeGap>>(emptyList())
     val (isLoading, setIsLoading) = useState(false)
     val dutyService = DutyService()
     val scope = MainScope()
 
-    val analyzeTetra = {
-        if (dutyNo.isBlank()) return@let
+    fun analyzeTetra() {
+        if (dutyNo.isBlank()) return
         setIsLoading(true)
         scope.launch {
             val result = dutyService.searchDuty(dayType, dutyNo)
             if (result.error == null) {
-                setGaps(utils.RakeAnalyzer.analyzeTetraKey(result.duties))
+                setGaps(RakeAnalyzer.analyzeTetraKey(result.duties))
             }
             setIsLoading(false)
         }
     }
 
     div {
-        className = "admin-section"
+        attrs["className"] = "admin-section"
         h3 { +"🔑 Tetra Key Analysis" }
 
         div {
-            className = "input-group"
+            attrs["className"] = "input-group"
             select {
-                className = "jarvis-select"
+                attrs["className"] = "jarvis-select"
                 value = dayType
                 onChange = { e -> setDayType(e.target.value) }
                 listOf("Weekday", "Saturday", "Sunday", "Special").forEach { day ->
@@ -386,9 +378,9 @@ val TetraTab = FC<Props> {
         }
 
         div {
-            className = "input-group"
+            attrs["className"] = "input-group"
             input {
-                className = "jarvis-input"
+                attrs["className"] = "jarvis-input"
                 placeholder = "Duty Number"
                 value = dutyNo
                 onChange = { e -> setDutyNo(e.target.value) }
@@ -396,24 +388,24 @@ val TetraTab = FC<Props> {
         }
 
         button {
-            className = "jarvis-btn btn-red"
+            attrs["className"] = "jarvis-btn btn-red"
             disabled = isLoading
             onClick = { analyzeTetra() }
-            +if (isLoading) "Analyzing..." else "🔑 ANALYZE TETRA"
+            +(if (isLoading) "Analyzing..." else "🔑 ANALYZE TETRA")
         }
 
         if (gaps.isNotEmpty()) {
             div {
-                className = "tetra-results"
+                attrs["className"] = "tetra-results"
                 gaps.forEach { gap ->
                     div {
-                        className = "tetra-item ${if (gap.action == "BOARD") "board" else "alight"}"
+                        attrs["className"] = "tetra-item ${if (gap.action == "BOARD") "board" else "alight"}"
                         div {
-                            className = "tetra-badge"
+                            attrs["className"] = "tetra-badge"
                             +gap.action.substring(0, 1)
                         }
                         div {
-                            className = "tetra-info"
+                            attrs["className"] = "tetra-info"
                             +"${gap.rakeId} @ ${gap.location} - ${gap.time}"
                         }
                     }
@@ -429,12 +421,12 @@ external interface UsersTabProps : Props {
 
 val UsersTab = FC<UsersTabProps> { props ->
     div {
-        className = "admin-section"
+        attrs["className"] = "admin-section"
         h3 { +"👥 User Management" }
         p { +"Current user: ${props.user.empId} - ${props.user.name}" }
         p { +"Access level: ${props.user.accessLevel.uppercase()}" }
         div {
-            className = "info-box"
+            attrs["className"] = "info-box"
             +"User management requires backend configuration. Contact your system administrator."
         }
     }
