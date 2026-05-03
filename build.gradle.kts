@@ -12,10 +12,6 @@ repositories {
 kotlin {
     js(IR) {
         browser {
-            // Disable tests to avoid Gradle 9.x destination property crash
-            testTask {
-                enabled = false
-            }
             commonWebpackConfig {
                 cssSupport {
                     enabled.set(true)
