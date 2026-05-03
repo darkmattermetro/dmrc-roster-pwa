@@ -8,6 +8,10 @@ version = "1.0.0"
 kotlin {
     js(IR) {
         browser {
+            // Disable test tasks to avoid Gradle 9.x compatibility issues
+            testTask {
+                enabled = false
+            }
             commonWebpackConfig {
                 cssSupport {
                     enabled.set(true)
