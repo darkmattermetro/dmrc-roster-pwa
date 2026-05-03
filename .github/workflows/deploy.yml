@@ -20,7 +20,7 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
       - name: Build Production Bundle
-        run: gradle browserDistribution -Dorg.gradle.jvmargs="-Xmx4g" --no-daemon --stacktrace
+        run: gradle jsBrowserDistribution -Dorg.gradle.jvmargs="-Xmx4g" --no-daemon --stacktrace
       - name: Setup Pages
         uses: actions/configure-pages@v4
       - name: Upload artifact
