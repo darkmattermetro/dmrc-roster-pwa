@@ -18,7 +18,9 @@ jobs:
           distribution: 'temurin'
           cache: 'gradle'
       - name: Build Production Bundle
-        run: ./gradlew jsBrowserDistribution --no-daemon
+        run: |
+          chmod +x gradlew
+          ./gradlew jsBrowserDistribution --no-daemon
       - name: Setup Pages
         uses: actions/configure-pages@v4
       - name: Upload artifact
