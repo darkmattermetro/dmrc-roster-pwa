@@ -1,5 +1,5 @@
 plugins {
-    kotlin("multiplatform") version "1.9.22"
+    kotlin("js") version "1.9.24"
 }
 
 group = "com.dmrc.roster"
@@ -19,16 +19,16 @@ kotlin {
             }
         }
         binaries.executable()
+    }
 
-        sourceSets {
-            val jsMain by getting {
-                dependencies {
-                    implementation("org.jetbrains.kotlin-wrappers:kotlin-react:18.2.0-pre.682")
-                    implementation("org.jetbrains.kotlin-wrappers:kotlin-react-dom:18.2.0-pre.682")
-                    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
-                    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")
-                    implementation(npm("chart.js", "4.4.1"))
-                }
+    sourceSets {
+        val jsMain by getting {
+            dependencies {
+                implementation("org.jetbrains.kotlin-wrappers:kotlin-react:18.2.0-pre.682")
+                implementation("org.jetbrains.kotlin-wrappers:kotlin-react-dom:18.2.0-pre.682")
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
+                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")
+                implementation(npm("chart.js", "4.4.1"))
             }
         }
     }
