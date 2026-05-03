@@ -20,7 +20,7 @@ jobs:
       - name: Build Production Bundle
         run: |
           chmod +x gradlew
-          ./gradlew jsBrowserDistribution --no-daemon
+          ./gradlew browserDistribution --no-daemon
       - name: Setup Pages
         uses: actions/configure-pages@v4
       - name: Upload artifact
